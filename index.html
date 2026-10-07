@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alessandro Villogas | Software Engineer & Fundador de Auralix</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Portfolio interactivo de Alessandro Villogas. Full-Stack Engineer, creador de Lumen IA on-device, lenguajes de programación y aplicaciones Flutter/Dart desde Huancayo, Perú.">
+    <meta name="keywords" content="Alessandro Villogas, Auralix Studio, Flutter, Dart, Zig, IA offline, Qwen2.5, LLM, Software Engineer, Perú">
+    <meta property="og:title" content="Alessandro Villogas | Software Engineer">
+    <meta property="og:description" content="Explora mi portfolio estilo Hyprland. Proyectos end-to-end, IA on-device (Lumen) y compiladores.">
+    <meta property="og:url" content="https://alessandrovillogas.com">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/291671060?s=200&v=4">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <h1 class="sr-only">Portfolio de Alessandro Villogas - Ingeniero de Software y Fundador de Auralix Studio</h1>
+
+    <!-- ================= SDDM LOGIN SCREEN ================= -->
+    <div id="login-screen">
+        <div class="login-content">
+            <h2 class="login-welcome">Welcome!</h2>
+            <div class="login-clock" id="login-time">15:52</div>
+            <div class="login-date" id="login-date">Sunday, 7 of April</div>
+            
+            <div class="login-box">
+                <div class="login-input-group">
+                    <i data-lucide="user" class="login-icon"></i>
+                    <input type="text" value="Kyokino (Alessandro)" readonly class="login-input login-user">
+                </div>
+                <div class="login-input-group mt-2">
+                    <input type="password" class="login-input" id="login-pwd" placeholder="Password" autofocus>
+                </div>
+                
+                <button class="login-btn" id="login-btn">Login</button>
+                <div class="login-session">Session: Hyprland</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de brillo controlado por el slider -->
+    <div id="brightness-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:black; opacity:0; pointer-events:none; z-index:99999; transition: opacity 0.2s;"></div>
+
+    <canvas id="wallpaper" aria-hidden="true"></canvas>
+
+    <!-- Sistema de Notificaciones -->
+    <div id="notifications-container"></div>
+
+    <nav class="waybar waybar-top" aria-label="Barra de estado superior">
+        <!-- LEFT: Workspaces & Logo -->
+        <div class="waybar-left">
+            <span class="waybar-logo" role="button" aria-label="Menú principal" tabindex="0">
+                <img id="auralix-logo" src="https://avatars.githubusercontent.com/u/291671060?s=200&v=4" alt="Logo" onerror="this.outerHTML='<span class=\'fallback-logo\'>Auralix</span>'">
+            </span>
+            <div class="waybar-workspaces" role="tablist">
+                <button class="workspace-btn active" role="tab" aria-selected="true" aria-label="Workspace 1" title="Alt+1">1</button>
+                <button class="workspace-btn" role="tab" aria-selected="false" aria-label="Workspace 2" title="Alt+2">2</button>
+                <button class="workspace-btn" role="tab" aria-selected="false" aria-label="Workspace 3" title="Alt+3">3</button>
+                <button class="workspace-btn" role="tab" aria-selected="false" aria-label="Workspace 4" title="Alt+4">4</button>
+                <button class="workspace-btn" role="tab" aria-selected="false" aria-label="Workspace 5" title="Alt+5">5</button>
+            </div>
+            <span class="waybar-separator" aria-hidden="true"></span>
+            <span class="waybar-module hover-module" id="btn-cpu" title="Ver rendimiento"><i data-lucide="cpu" class="waybar-icon" aria-hidden="true"></i> <span id="cpu-usage">4%</span></span>
+            <span class="waybar-module hover-module" id="btn-ram" title="Ver rendimiento"><i data-lucide="memory-stick" class="waybar-icon" aria-hidden="true"></i> <span id="ram-usage">2.4G</span></span>
+            <span class="waybar-separator" aria-hidden="true"></span>
+            <span class="waybar-module hover-module" id="btn-location" title="Ubicación"><i data-lucide="map-pin" class="waybar-icon" aria-hidden="true"></i> Huancayo</span>
+        </div>
+
+        <!-- CENTER: Window Title Pill -->
+        <div class="waybar-center">
+            <span class="waybar-active-window" id="active-ws-title">~ / inicio</span>
+        </div>
+
+        <!-- RIGHT: Tray & Clock -->
+        <div class="waybar-right hidden-mobile">
+            <span class="waybar-module hover-module cc-toggle" title="Online"><i data-lucide="wifi" class="waybar-icon"></i></span>
+            <span class="waybar-module hover-module cc-toggle" title="Volumen"><i data-lucide="volume-2" class="waybar-icon"></i></span>
+            <span class="waybar-module hover-module cc-toggle" title="Batería: 100%"><i data-lucide="battery-charging" class="waybar-icon"></i> 100%</span>
+            <span class="waybar-separator" aria-hidden="true"></span>
+            <span class="waybar-module hover-module cc-toggle" title="Settings"><i data-lucide="layout-grid" class="waybar-icon"></i></span>
+            <span class="waybar-separator" aria-hidden="true"></span>
+            <span class="waybar-module hover-module" id="clock" aria-label="Hora actual">00:00:00</span>
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR DESKTOP: Soporta Tiling layout o Floating layout -->
+    <main class="desktop" id="desktop" role="main">
+        
+        <!-- ================= WORKSPACE 1 ================= -->
+        <!-- Ventana: Terminal (Hero) -->
+        <section class="window active is-open" id="win-terminal" data-workspace="1" aria-label="Terminal interactiva">
+            <header class="titlebar">
+                <div class="titlebar-controls" aria-hidden="true">
+                    <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
+                    <div class="ctrl minimize" title="Minimizar"><span>−</span></div>
+                    <div class="ctrl maximize" title="Maximizar"><span>□</span></div>
+                </div>
+                <div class="titlebar-title">tty1.sh</div>
+                <div class="titlebar-icon"><i data-lucide="terminal" class="t-icon"></i></div>
+            </header>
+            <div class="window-content terminal" id="terminal-container">
+                <div id="typewriter-container" class="terminal-line" aria-live="polite"></div>
+                <div id="terminal-history" style="display: none;"></div>
+                <div class="terminal-input-wrapper" style="display: none;">
+                    <span class="prompt"><span class="prompt-user">alessandro</span><span class="prompt-at">@</span><span class="prompt-host">auralix</span> <span class="prompt-path">~</span> <span class="prompt-char">➜</span></span>
+                    <label for="terminal-input" class="sr-only">Escribe un comando</label>
+                    <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ventana: Gestor de Archivos (Proyectos) -->
+        <section class="window is-open" id="win-projects" data-workspace="1" aria-label="Gestor de proyectos">
+            <header class="titlebar">
+                <div class="titlebar-controls" aria-hidden="true">
+                    <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
+                    <div class="ctrl minimize" title="Minimizar"><span>−</span></div>
+                    <div class="ctrl maximize" title="Maximizar"><span>□</span></div>
+                </div>
+                <div class="titlebar-title">proyectos.sh</div>
+                <div class="titlebar-icon"><i data-lucide="folder-open" class="t-icon"></i></div>
+            </header>
+            <div class="window-content file-manager">
+                <aside class="fm-sidebar" aria-label="Directorio de proyectos">
+                    <div class="fm-dir-title hidden-mobile" tabindex="0" role="button" aria-expanded="true"><i data-lucide="folder" class="fm-icon"></i> auralix-studio/</div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="alma"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">alma/</span></div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="kanso"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">kanso/</span></div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="nexo"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">nexo/</span></div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="lumen"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">lumen/</span></div>
+                    
+                    <div class="fm-dir-title hidden-mobile mt-3" tabindex="0" role="button" aria-expanded="true"><i data-lucide="folder" class="fm-icon"></i> alexito-hub/</div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="media-keep"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">media-keep/</span></div>
+                    <div class="fm-item" tabindex="0" role="button" data-project="flux"><i data-lucide="file-code" class="fm-icon"></i> <span class="item-name">flux/</span></div>
+                </aside>
+                <article class="fm-main" id="project-detail" aria-live="polite">
+                    <!-- Detalle inyectado por JS -->
+                </article>
+            </div>
+        </section>
+
+        <!-- Ventana: Sobre Mí (Neovim) -->
+        <section class="window is-open" id="win-about" data-workspace="1" aria-label="Sobre mí">
+            <header class="titlebar">
+                <div class="titlebar-controls" aria-hidden="true">
+                    <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
+                    <div class="ctrl minimize" title="Minimizar"><span>−</span></div>
+                    <div class="ctrl maximize" title="Maximizar"><span>□</span></div>
+                </div>
+                <div class="titlebar-title">nvim readme.md</div>
+                <div class="titlebar-icon"><i data-lucide="file-text" class="t-icon"></i></div>
+            </header>
+            <div class="window-content nvim-view">
+                <div class="nvim-text">
+                    <h2 style="color: var(--purple); font-size: 18px; margin-bottom: 10px; font-weight: bold;">Sobre Mí</h2>
+                    <p>Desarrollador de software independiente y fundador de <strong>Auralix Studio</strong>. Construyo proyectos end-to-end desde Huancayo, Perú: desde el diseño de lenguajes de programación y compiladores hasta asistentes de inteligencia artificial on-device.</p>
+                    <p>Estudiante de Ing. de Sistemas y Computación (UPLA). Lo que construyo no es genérico: cada proyecto resuelve problemas reales controlando el stack y reduciendo dependencias externas al mínimo absoluto.</p>
+                    
+                    <h3 style="color: var(--cyan); margin-top: 20px; font-size: 14px; margin-bottom: 8px;">Contacto & Enlaces</h3>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <a href="https://github.com/Alexito-Hub" target="_blank" style="color: var(--green); text-decoration: none; display: flex; align-items: center; gap: 8px;"><i data-lucide="github" style="width:14px;height:14px"></i> GitHub Personal (Alexito-Hub)</a>
+                        <a href="https://github.com/Auralix-Studio" target="_blank" style="color: var(--green); text-decoration: none; display: flex; align-items: center; gap: 8px;"><i data-lucide="github" style="width:14px;height:14px"></i> GitHub Organización (Auralix-Studio)</a>
+                        <a href="mailto:alessandrovillogas@outlook.es" style="color: var(--yellow); text-decoration: none; display: flex; align-items: center; gap: 8px;"><i data-lucide="mail" style="width:14px;height:14px"></i> Correo: alessandrovillogas@outlook.es</a>
+                    </div>
+                </div>
+                <footer class="nvim-statusline">
+                    <span class="mode">NORMAL</span>
+                    <span class="file">readme.md</span>
+                    <span class="enc hidden-mobile">utf-8</span>
+                    <span class="pos hidden-mobile">16:32</span>
+                </footer>
+            </div>
+        </section>
+
+
+        <!-- ================= WORKSPACE 2 ================= -->
+        <!-- Ventana: Music Player -->
+        <section class="window" id="win-music" data-workspace="2" aria-label="Reproductor de Música" style="display: none; top: 15%; left: 30%; width: 40%; height: 60%; min-height: 300px;">
+            <header class="titlebar">
+                <div class="titlebar-controls" aria-hidden="true">
+                    <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
+                    <div class="ctrl minimize" title="Minimizar"><span>−</span></div>
+                    <div class="ctrl maximize" title="Maximizar"><span>□</span></div>
+                </div>
+                <div class="titlebar-title">ncmpcpp (Música)</div>
+                <div class="titlebar-icon"><i data-lucide="music" class="t-icon"></i></div>
+            </header>
+            <div class="window-content music-player">
+                <div class="disk-container">
+                    <div class="disk" id="music-disk">
+                        <i data-lucide="disc" style="width:100px; height:100px; color: var(--ctp-subtext);"></i>
+                    </div>
+                </div>
+                <div class="track-info">
+                    <h3 id="track-name">Lo-Fi Study Vibes</h3>
+                    <p id="track-artist">Auralix Session - assets/track1.mp3</p>
+                </div>
+                <div class="player-controls">
+                    <button class="player-btn" id="btn-prev" title="Pista Anterior"><i data-lucide="skip-back"></i></button>
+                    <button class="player-btn play-pause" id="btn-play"><i data-lucide="play"></i></button>
+                    <button class="player-btn" id="btn-next" title="Pista Siguiente"><i data-lucide="skip-forward"></i></button>
+                </div>
+                <audio id="audio-player" src="assets/track1.mp3" loop></audio>
+            </div>
+        </section>
+
+        <!-- Ventana: htop (Skills) -->
+        <section class="window is-open" id="win-htop" data-workspace="1">
+            <header class="titlebar">
+                <div class="titlebar-controls" aria-hidden="true">
+                    <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
+                    <div class="ctrl minimize"><span>−</span></div>
+                    <div class="ctrl maximize"><span>□</span></div>
+                </div>
+                <div class="titlebar-title">htop (Skills & Specs)</div>
+                <div class="titlebar-icon"><i data-lucide="server" class="t-icon"></i></div>
+            </header>
+            <div class="window-content terminal" style="background: rgba(17, 17, 27, 0.7); padding: 25px; font-size: 13px;">
+                <h2 style="color: var(--accent); margin-bottom: 20px;">Estadísticas del Sistema (Alessandro)</h2>
+                
+                <div style="display:flex; gap: 30px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex:1; min-width: 250px;">
+                        <div class="skill-row"><span class="sk-name">1 [Flutter]</span><span class="sk-bar"><div style="width: 95%; background: var(--accent);"></div></span> <span class="sk-pct">95.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">2 [Dart]</span><span class="sk-bar"><div style="width: 90%; background: var(--accent);"></div></span> <span class="sk-pct">90.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">3 [Zig]</span><span class="sk-bar"><div style="width: 65%; background: var(--yellow);"></div></span> <span class="sk-pct">65.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">4 [Elixir]</span><span class="sk-bar"><div style="width: 75%; background: var(--purple);"></div></span> <span class="sk-pct">75.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">5 [TS/JS]</span><span class="sk-bar"><div style="width: 80%; background: var(--yellow);"></div></span> <span class="sk-pct">80.0%</span></div>
+                    </div>
+                    <div style="flex:1; min-width: 250px;">
+                        <div class="skill-row"><span class="sk-name">6 [IA Local]</span><span class="sk-bar"><div style="width: 85%; background: var(--green);"></div></span> <span class="sk-pct">85.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">7 [Qwen2.5]</span><span class="sk-bar"><div style="width: 80%; background: var(--green);"></div></span> <span class="sk-pct">80.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">8 [Linux]</span><span class="sk-bar"><div style="width: 90%; background: var(--red);"></div></span> <span class="sk-pct">90.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">9 [Rust]</span><span class="sk-bar"><div style="width: 50%; background: var(--yellow);"></div></span> <span class="sk-pct">50.0%</span></div>
+                        <div class="skill-row"><span class="sk-name">10[Git/CI]</span><span class="sk-bar"><div style="width: 85%; background: var(--red);"></div></span> <span class="sk-pct">85.0%</span></div>
+                    </div>
+                </div>
+                
+                <hr style="border: none; border-top: 1px dashed var(--ctp-overlay0); margin: 20px 0;">
+                
+                <div style="line-height: 1.8;">
+                    <p><strong style="color: var(--green);">Uptime:</strong> 20+ años de edad</p>
+                    <p><strong style="color: var(--green);">Educación:</strong> Ing. Sistemas y Computación (UPLA) - 4° Ciclo</p>
+                    <p><strong style="color: var(--green);">Ubicación:</strong> Huancayo, Perú</p>
+                    <p><strong style="color: var(--green);">Filosofía:</strong> Construir software cero-dependencias, offline first e hiper-optimizado al bare-metal.</p>
+                    <br>
+                    <p><strong style="color: var(--yellow);">Tasks:</strong> 42 projects, 4 active, 1 sleeping.</p>
+                    <p><strong style="color: var(--yellow);">Load average:</strong> 0.85, 0.90, 0.95 (Alta Productividad)</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Context Menu (Click Derecho) -->
+    <div id="context-menu" class="context-menu" style="display: none;">
+        <div class="ctx-item" id="ctx-terminal"><i data-lucide="terminal"></i> Nueva Terminal <span style="margin-left:auto;font-size:10px;color:var(--ctp-overlay0)">Alt+T</span></div>
+        <div class="ctx-item" id="ctx-launcher"><i data-lucide="search"></i> Abrir Lanzador <span style="margin-left:auto;font-size:10px;color:var(--ctp-overlay0)">Alt+Space</span></div>
+        <div class="ctx-item" id="ctx-tiling-toggle"><i data-lucide="layout-grid"></i> Modo Tiling / Floating <span style="margin-left:auto;font-size:10px;color:var(--ctp-overlay0)">Alt+F</span></div>
+        <div class="ctx-separator"></div>
+        <div class="ctx-item" id="ctx-wallpaper"><i data-lucide="image"></i> Cambiar Fondo Aleatorio</div>
+    </div>
+
+    <!-- App Launcher (Rofi / Wofi clone) -->
+    <div id="app-launcher" class="app-launcher" style="display: none;">
+        <div class="launcher-search">
+            <i data-lucide="search"></i>
+            <input type="text" id="launcher-input" placeholder="Buscar apps... (Alt+Space)" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="launcher-results" id="launcher-results">
+            <div class="launcher-item" data-app="win-terminal"><i data-lucide="terminal"></i> Terminal</div>
+            <div class="launcher-item" data-app="win-projects"><i data-lucide="folder"></i> Gestor de Proyectos</div>
+            <div class="launcher-item" data-app="win-about"><i data-lucide="file-text"></i> Sobre Mí</div>
+            <div class="launcher-item" data-app="win-music"><i data-lucide="music"></i> Reproductor de Música</div>
+            <div class="launcher-item" data-app="win-htop"><i data-lucide="server"></i> htop (Skills)</div>
+        </div>
+    </div>
+
+    <!-- Removed bottom waybar -->
+    <!-- Control Center Popup -->
+    <div id="control-center" class="control-center" style="display: none;">
+        <div class="cc-row">
+            <div class="cc-btn active" data-id="wifi"><i data-lucide="wifi"></i><span>Wi-Fi</span></div>
+            <div class="cc-btn active" data-id="bt" style="background: var(--purple);"><i data-lucide="bluetooth"></i><span>Bluetooth</span></div>
+            <div class="cc-btn" data-id="dnd"><i data-lucide="moon"></i><span>No Molestar</span></div>
+        </div>
+        <div class="cc-row">
+            <div class="cc-btn active" id="btn-tiling-cc" style="flex: 1; flex-direction: row; justify-content: center; background: var(--green); color: var(--ctp-crust);"><i data-lucide="layout-dashboard"></i><span>Modo Tiling (Alt+F)</span></div>
+        </div>
+        <div class="cc-slider-wrapper">
+            <i data-lucide="volume-2" style="width: 16px;"></i>
+            <input type="range" min="0" max="100" value="80" class="cc-slider" id="vol-slider" aria-label="Volumen">
+        </div>
+        <div class="cc-slider-wrapper">
+            <i data-lucide="sun" style="width: 16px;"></i>
+            <input type="range" min="0" max="100" value="100" class="cc-slider" id="bright-slider" aria-label="Brillo">
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
