@@ -134,30 +134,8 @@ document.querySelectorAll('.window').forEach(win => {
 });
 
 function updateTilingLayout() {
-    const desktop = document.getElementById('desktop');
-    if(!desktop.classList.contains('layout-tiling')) {
-        document.querySelectorAll('.window').forEach(w => {
-            w.style.gridColumn = ''; w.style.gridRow = '';
-        });
-        return;
-    }
-    const currentWs = document.querySelector('.workspace-btn.active').textContent.trim();
-    // Ignore floating windows from tiling calculation
-    const activeWins = Array.from(document.querySelectorAll(`.window[data-workspace="${currentWs}"]`)).filter(w => 
-        w.style.display !== 'none' && w.style.display !== '' && !w.classList.contains('floating')
-    );
-    const n = activeWins.length;
-    
-    document.querySelectorAll('.window').forEach(w => { w.style.gridColumn = ''; w.style.gridRow = ''; });
-    desktop.className = desktop.className.replace(/tiling-count-\d+/g, '').trim();
-    
-    if(n > 0) {
-        desktop.classList.add(`tiling-count-${n}`);
-        if(n === 3 || n === 5) {
-            activeWins[0].style.gridRow = '1 / 3'; // Master window takes full height
-            if(n === 5) activeWins[1].style.gridRow = '1 / 3';
-        }
-    }
+    // Tiling logic has been disabled per user request.
+    // Windows are now fully floating and freely manageable.
 }
 
 // Window Controls
@@ -404,17 +382,15 @@ function toggleTiling() {
     updateTilingLayout();
 }
 
-// Waybar Top Buttons Logic
-document.getElementById('btn-cpu')?.addEventListener('click', () => { 
-    restoreWindow('win-htop'); 
-    notify("Sistema", "Abriendo monitor de recursos", "cpu"); 
-});
-document.getElementById('btn-ram')?.addEventListener('click', () => { 
-    restoreWindow('win-htop'); 
-    notify("Sistema", "Abriendo monitor de recursos", "memory-stick"); 
-});
-document.getElementById('btn-location')?.addEventListener('click', () => { 
-    notify("Ubicación", "Huancayo, Junín, Perú (Zona Horaria: PET/UTC-5)", "map-pin"); 
+// --- Waybar App Shortcuts ---
+document.querySelectorAll('.app-shortcut').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const appId = btn.dataset.app;
+        if(appId) {
+            restoreWindow(appId);
+            notify("App Iniciada", `Abriendo ${btn.getAttribute('title') || appId}`, "zap");
+        }
+    });
 });
 
 // --- App Launcher (Rofi/Wofi) ---
@@ -432,7 +408,7 @@ function toggleLauncher() {
         gsap.to(launcher, { scale: 0.9, opacity: 0, duration: 0.2, onComplete: () => launcher.style.display = 'none' });
     }
 }
-document.getElementById('btn-start-launcher').addEventListener('click', (e) => { e.stopPropagation(); toggleLauncher(); });
+document.getElementById('btn-start-launcher')?.addEventListener('click', (e) => { e.stopPropagation(); toggleLauncher(); });
 launcherInput.addEventListener('input', (e) => filterLauncher(e.target.value.toLowerCase()));
 function filterLauncher(term) {
     document.querySelectorAll('.launcher-item').forEach(item => {
@@ -566,11 +542,33 @@ const restoreWindow = (id) => {
     const win = document.getElementById(id);
     if (!win) return;
     
-    // Obtener el workspace actual
     const currentWs = document.querySelector('.workspace-btn.active').textContent.trim();
     
-    // Mover la ventana al workspace actual (para que no redireccione)
-    win.dataset.workspace = currentWs;
+    // Si la ventana ya está abierta (y visible en algún workspace)
+    if (win.classList.contains('is-open')) {
+        const winWs = win.dataset.workspace;
+        
+        if (winWs !== currentWs) {
+            // Está en otro workspace: cambiar a ese workspace
+            const wsBtns = Array.from(document.querySelectorAll('.workspace-btn'));
+            const targetBtn = wsBtns.find(b => b.textContent.trim() === winWs);
+            if (targetBtn) {
+                targetBtn.click();
+                // Darle tiempo a la animación de cambio de workspace
+                setTimeout(() => {
+                    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+                    win.classList.add('active');
+                    win.style.zIndex = ++highestZ;
+                    document.getElementById('active-ws-title').textContent = `~ / ${win.id.replace('win-', '')}`;
+                }, 300);
+                return;
+            }
+        }
+    } else {
+        // No está abierta: asignarla al workspace actual
+        win.dataset.workspace = currentWs;
+    }
+    
     win.classList.add('is-open'); // Mark as open
     
     if (win.style.display === 'none' || win.style.display === '') {
@@ -704,12 +702,14 @@ window.addEventListener('DOMContentLoaded', () => {
         
         setTimeout(() => {
             loginScreen.style.display = 'none';
-            // Update layout to show the 4 initial windows
+            // Update layout (disabled tiling but kept function call for safety)
             updateTilingLayout();
             
-            // Animate windows popping in now that login screen is gone
-            const ws1Windows = Array.from(document.querySelectorAll('.window[data-workspace="1"]'));
-            gsap.from(ws1Windows, { duration: 0.5, y: 20, opacity: 0, scale: 0.95, stagger: 0.1, ease: "power3.out" });
+            // Only animate the windows that are open by default
+            const ws1Windows = Array.from(document.querySelectorAll('.window[data-workspace="1"].is-open'));
+            if(ws1Windows.length > 0) {
+                gsap.from(ws1Windows, { duration: 0.5, y: 20, opacity: 0, scale: 0.95, stagger: 0.1, ease: "power3.out" });
+            }
             
             // Start boot animation in the terminal tile
             setTimeout(type, 300);
@@ -748,3 +748,70 @@ document.getElementById('btn-ram')?.addEventListener('click', () => {
 document.getElementById('btn-location')?.addEventListener('click', () => {
     notify("Ubicación", "Huancayo, Perú. Latencia de red: 12ms a servidores de Lima.", "map-pin");
 });
+
+// --- Music Player Logic ---
+const playlist = [
+    { title: "Ocean Eyes", artist: "Billie Eilish", file: "assets/music/ocean_eyes.mp3" },
+    { title: "Gone, Gone, Gone", artist: "Phillip Phillips", file: "assets/music/gone_gone_gone.mp3" },
+    { title: "Riptide", artist: "Vance Joy", file: "assets/music/riptide.mp3" }
+];
+let currentSongIndex = 0;
+
+const audioPlayer = document.getElementById('audio-player');
+const trackName = document.getElementById('track-name');
+const trackArtist = document.getElementById('track-artist');
+const btnPlay = document.getElementById('btn-play');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const musicDisk = document.getElementById('music-disk');
+
+function loadSong(index) {
+    const song = playlist[index];
+    trackName.textContent = song.title;
+    trackArtist.textContent = song.artist;
+    audioPlayer.src = song.file;
+}
+
+function playSong() {
+    audioPlayer.play();
+    btnPlay.innerHTML = '<i data-lucide="pause"></i>';
+    musicDisk.style.animationPlayState = 'running';
+    lucide.createIcons();
+}
+
+function pauseSong() {
+    audioPlayer.pause();
+    btnPlay.innerHTML = '<i data-lucide="play"></i>';
+    musicDisk.style.animationPlayState = 'paused';
+    lucide.createIcons();
+}
+
+btnPlay?.addEventListener('click', () => {
+    if (audioPlayer.paused) {
+        playSong();
+    } else {
+        pauseSong();
+    }
+});
+
+btnNext?.addEventListener('click', () => {
+    currentSongIndex = (currentSongIndex + 1) % playlist.length;
+    loadSong(currentSongIndex);
+    playSong();
+});
+
+btnPrev?.addEventListener('click', () => {
+    currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+    loadSong(currentSongIndex);
+    playSong();
+});
+
+audioPlayer?.addEventListener('ended', () => {
+    btnNext.click();
+});
+
+// Load first song on init
+if(audioPlayer) {
+    loadSong(currentSongIndex);
+    audioPlayer.loop = false; // Disable default loop since we handle 'ended' event
+}

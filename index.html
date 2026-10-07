@@ -72,10 +72,11 @@
                 <button class="workspace-btn" role="tab" aria-selected="false" aria-label="Workspace 5" title="Alt+5">5</button>
             </div>
             <span class="waybar-separator" aria-hidden="true"></span>
-            <span class="waybar-module hover-module" id="btn-cpu" title="Ver rendimiento"><i data-lucide="cpu" class="waybar-icon" aria-hidden="true"></i> <span id="cpu-usage">4%</span></span>
-            <span class="waybar-module hover-module" id="btn-ram" title="Ver rendimiento"><i data-lucide="memory-stick" class="waybar-icon" aria-hidden="true"></i> <span id="ram-usage">2.4G</span></span>
-            <span class="waybar-separator" aria-hidden="true"></span>
-            <span class="waybar-module hover-module" id="btn-location" title="Ubicación"><i data-lucide="map-pin" class="waybar-icon" aria-hidden="true"></i> Huancayo</span>
+            <span class="waybar-module hover-module app-shortcut" data-app="win-terminal" title="Terminal (Alt+T)"><i data-lucide="terminal" class="waybar-icon" aria-hidden="true"></i></span>
+            <span class="waybar-module hover-module app-shortcut" data-app="win-projects" title="Proyectos"><i data-lucide="folder" class="waybar-icon" aria-hidden="true"></i></span>
+            <span class="waybar-module hover-module app-shortcut" data-app="win-htop" title="Skills & Specs"><i data-lucide="server" class="waybar-icon" aria-hidden="true"></i></span>
+            <span class="waybar-module hover-module app-shortcut" data-app="win-music" title="Música"><i data-lucide="music" class="waybar-icon" aria-hidden="true"></i></span>
+            <span class="waybar-module hover-module app-shortcut" data-app="win-about" title="Sobre Mí"><i data-lucide="user" class="waybar-icon" aria-hidden="true"></i></span>
         </div>
 
         <!-- CENTER: Window Title Pill -->
@@ -122,7 +123,7 @@
         </section>
 
         <!-- Ventana: Gestor de Archivos (Proyectos) -->
-        <section class="window is-open" id="win-projects" data-workspace="1" aria-label="Gestor de proyectos">
+        <section class="window is-open" id="win-projects" data-workspace="1" aria-label="Gestor de proyectos" style="top: 70px; left: auto; right: 3%; width: 45%; height: 45%; min-height: 300px;">
             <header class="titlebar">
                 <div class="titlebar-controls" aria-hidden="true">
                     <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
@@ -151,7 +152,7 @@
         </section>
 
         <!-- Ventana: Sobre Mí (Neovim) -->
-        <section class="window is-open" id="win-about" data-workspace="1" aria-label="Sobre mí">
+        <section class="window is-open" id="win-about" data-workspace="1" aria-label="Sobre mí" style="top: 55%; left: auto; right: 3%; width: 45%; height: 40%; min-height: 300px;">
             <header class="titlebar">
                 <div class="titlebar-controls" aria-hidden="true">
                     <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
@@ -184,9 +185,9 @@
         </section>
 
 
-        <!-- ================= WORKSPACE 2 ================= -->
+        <!-- ================= WORKSPACE 1 (CONTINUED) ================= -->
         <!-- Ventana: Music Player -->
-        <section class="window" id="win-music" data-workspace="2" aria-label="Reproductor de Música" style="display: none; top: 15%; left: 30%; width: 40%; height: 60%; min-height: 300px;">
+        <section class="window" id="win-music" data-workspace="1" aria-label="Reproductor de Música" style="display: none; top: 15%; left: 30%; width: 40%; height: 60%; min-height: 300px;">
             <header class="titlebar">
                 <div class="titlebar-controls" aria-hidden="true">
                     <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
@@ -216,7 +217,7 @@
         </section>
 
         <!-- Ventana: htop (Skills) -->
-        <section class="window is-open" id="win-htop" data-workspace="1">
+        <section class="window is-open" id="win-htop" data-workspace="1" style="top: 55%; left: 3%; width: 45%; height: 40%; min-height: 300px;">
             <header class="titlebar">
                 <div class="titlebar-controls" aria-hidden="true">
                     <div class="ctrl close" title="Cerrar (Alt+Q)"><span>×</span></div>
